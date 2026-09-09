@@ -1,0 +1,10 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_GOOGLE_REVIEW_URL: ${NEXT_PUBLIC_GOOGLE_REVIEW_URL:-https://maps.app.goo.gl/Qjt9xkPTfEkLzey46}
+    image: clinica-bolivar/semaforo-salud:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
