@@ -18,6 +18,11 @@
 /.vinext/
 /out/
 
+# agents
+/.commandcode/
+/.agents/
+/.codex/
+
 # misc
 .DS_Store
 *.pem

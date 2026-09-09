@@ -33,7 +33,7 @@ export function ReviewModule() {
           <MessageSquareText className="size-5" aria-hidden="true" />
         </span>
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-950">¿Cómo fue tu experiencia?</h2>
+          <h2 className="font-poppins text-xl font-bold tracking-tight text-slate-950">¿Cómo fue tu experiencia?</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">Tu opinión nos ayuda a mejorar este chequeo preventivo.</p>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function ReviewModule() {
 
       {rating > 0 && rating <= 3 && !submitted && (
         <form className="mt-5" onSubmit={submitFeedback}>
-          <label htmlFor="feedback" className="text-sm font-semibold text-slate-700">Cuéntanos qué podemos mejorar</label>
+          <label htmlFor="feedback" className="font-poppins text-sm font-semibold text-slate-700">Cuéntanos qué podemos mejorar</label>
           <Textarea
             id="feedback"
             value={feedback}

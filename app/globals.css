@@ -89,7 +89,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-inter);
+  --font-poppins: var(--font-poppins);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 }
@@ -97,7 +98,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
 
 @theme {
@@ -136,6 +137,105 @@ textarea {
   }
 }
 
+/* Pantalla de análisis (acelerómetro) */
+.analyzing-halo {
+  animation: analyzing-halo-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes analyzing-halo-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.analyzing-ring {
+  animation: analyzing-ring-spin 1.4s linear infinite;
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+}
+
+@keyframes analyzing-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.analyzing-needle {
+  animation: analyzing-needle-swing 1.1s ease-in-out infinite;
+  transform-box: view-box;
+  transform-origin: 100px 135px;
+}
+
+@keyframes analyzing-needle-swing {
+  0% {
+    transform: rotate(-34deg);
+  }
+  50% {
+    transform: rotate(34deg);
+  }
+  100% {
+    transform: rotate(-34deg);
+  }
+}
+
+.analyzing-particle {
+  animation: analyzing-particle-float 1.6s ease-in-out infinite;
+}
+
+@keyframes analyzing-particle-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+.analyzing-progress {
+  animation: analyzing-progress-fill 2.1s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  transform-origin: left;
+}
+
+@keyframes analyzing-progress-fill {
+  from {
+    transform: scaleX(0.08);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.analyzing-dots span {
+  animation: analyzing-dot-blink 1.2s infinite;
+}
+
+.analyzing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.analyzing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes analyzing-dot-blink {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -144,5 +244,14 @@ textarea {
   .gauge-needle {
     animation: none;
     transition: none;
+  }
+
+  .analyzing-halo,
+  .analyzing-ring,
+  .analyzing-needle,
+  .analyzing-particle,
+  .analyzing-progress,
+  .analyzing-dots span {
+    animation: none;
   }
 }
