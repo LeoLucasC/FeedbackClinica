@@ -20,14 +20,31 @@ export type VitalResult = {
   detail: string;
 };
 
+export type CareAreaId = "generalMedicine" | "cardiology" | "pulmonology" | "nutrition";
+
+export type CareArea = {
+  id: CareAreaId;
+  name: string;
+  reason: string;
+};
+
+export type CareGuidance = {
+  level: "routine" | "scheduled" | "priority";
+  service: string;
+  timeframe: string;
+  summary: string;
+  areas: CareArea[];
+  actions: string[];
+};
+
 export type HealthResult = {
   status: HealthStatus;
-  score: number;
   bmi: number;
   title: string;
   message: string;
   recommendation: string;
   vitals: VitalResult[];
+  care: CareGuidance;
 };
 
 export const inputLimits: Record<keyof VitalsInput, { min: number; max: number }> = {
@@ -54,7 +71,7 @@ const statusCopy: Record<HealthStatus, Pick<HealthResult, "title" | "message" | 
   },
   red: {
     title: "Recomendamos atención oportuna",
-    message: "Detectamos al menos una medición que requiere valoración profesional.",
+    message: "Al menos una medición ingresada requiere valoración profesional.",
     recommendation: "Contacta a un profesional de salud. Si tienes síntomas intensos, busca atención de urgencia.",
   },
 };
@@ -67,7 +84,7 @@ function statusForBmi(value: number): HealthStatus {
 
 function statusForBloodPressure(systolic: number, diastolic: number): HealthStatus {
   if (systolic < 80 || systolic >= 180 || diastolic < 50 || diastolic >= 120) return "red";
-  if (systolic < 90 || systolic >= 130 || diastolic < 60 || diastolic >= 85) return "amber";
+  if (systolic < 90 || systolic >= 130 || diastolic < 60 || diastolic >= 80) return "amber";
   return "green";
 }
 
@@ -78,7 +95,7 @@ function statusForHeartRate(value: number): HealthStatus {
 }
 
 function statusForOxygen(value: number): HealthStatus {
-  if (value < 92) return "red";
+  if (value <= 92) return "red";
   if (value < 95) return "amber";
   return "green";
 }
@@ -107,6 +124,96 @@ export function validateVitals(vitals: VitalsInput) {
     const limits = inputLimits[key];
     return Number.isFinite(value) && value >= limits.min && value <= limits.max;
   });
+}
+
+const careAreaCopy: Record<CareAreaId, { name: string; vitalIds: VitalResult["id"][] }> = {
+  generalMedicine: { name: "Medicina General", vitalIds: ["temperature"] },
+  cardiology: { name: "Cardiología", vitalIds: ["bloodPressure", "heartRate"] },
+  pulmonology: { name: "Neumología", vitalIds: ["oxygen", "respiratoryRate"] },
+  nutrition: { name: "Nutrición Clínica", vitalIds: ["bmi"] },
+};
+
+function buildCareGuidance(vitals: VitalResult[], status: HealthStatus): CareGuidance {
+  const altered = vitals.filter((vital) => vital.status !== "green");
+  const hasAcuteRedFlag = vitals.some(
+    (vital) => vital.status === "red" && vital.id !== "bmi",
+  );
+  const areas = (Object.entries(careAreaCopy) as Array<[CareAreaId, (typeof careAreaCopy)[CareAreaId]]>)
+    .map(([id, area]) => {
+      const relatedVitals = altered.filter((vital) => area.vitalIds.includes(vital.id));
+      if (relatedVitals.length === 0) return null;
+
+      return {
+        id,
+        name: area.name,
+        reason: relatedVitals.map((vital) => vital.label).join(" y "),
+      } satisfies CareArea;
+    })
+    .filter((area): area is CareArea => area !== null);
+
+  if (status === "green") {
+    return {
+      level: "routine",
+      service: "Medicina General",
+      timeframe: "Control preventivo de rutina",
+      summary: "Es el servicio indicado para integrar tus antecedentes, síntomas y mediciones en un control preventivo.",
+      areas: [
+        {
+          id: "generalMedicine",
+          name: "Medicina General",
+          reason: "Revisión integral y seguimiento preventivo",
+        },
+      ],
+      actions: [
+        "Mantén tus controles periódicos según tu edad y antecedentes.",
+        "Repite las mediciones si aparecen síntomas o notas cambios persistentes.",
+      ],
+    };
+  }
+
+  if (status === "red" && hasAcuteRedFlag) {
+    return {
+      level: "priority",
+      service: "Atención prioritaria",
+      timeframe: "Solicita valoración hoy",
+      summary: "Primero se debe confirmar la medición y descartar una urgencia antes de una consulta por especialidad.",
+      areas,
+      actions: [
+        "Repite la medición en reposo y verifica que el equipo esté bien colocado.",
+        "Si el valor se confirma, busca valoración presencial el mismo día.",
+        "Si presentas dolor de pecho, falta de aire, confusión, desmayo o debilidad súbita, acude a Emergencias.",
+      ],
+    };
+  }
+
+  if (status === "red") {
+    return {
+      level: "priority",
+      service: "Medicina General",
+      timeframe: "Agenda una consulta prioritaria",
+      summary: "El IMC es una medida de detección, no un diagnóstico. Medicina General puede interpretarlo junto con tus antecedentes y coordinar apoyo nutricional.",
+      areas,
+      actions: [
+        "Agenda una valoración para revisar el resultado en contexto.",
+        "Evita iniciar dietas o tratamientos intensivos sin una evaluación profesional.",
+      ],
+    };
+  }
+
+  const directArea = areas.length === 1 ? areas[0] : null;
+  return {
+    level: "scheduled",
+    service: directArea?.name ?? "Medicina General",
+    timeframe: "Agenda una consulta",
+    summary: directArea
+      ? `La orientación inicial corresponde a ${directArea.name}; el profesional confirmará si necesitas estudios o derivación.`
+      : "Medicina General puede integrar los hallazgos y coordinar una derivación si fuera necesaria.",
+    areas,
+    actions: [
+      "Repite las mediciones en reposo y registra fecha y hora.",
+      "Lleva el registro a la consulta, especialmente si el resultado se mantiene.",
+    ],
+  };
 }
 
 export function evaluateVitals(vitals: VitalsInput): HealthResult {
@@ -138,13 +245,12 @@ export function evaluateVitals(vitals: VitalsInput): HealthResult {
   const redCount = vitalsWithDetails.filter((vital) => vital.status === "red").length;
   const amberCount = vitalsWithDetails.filter((vital) => vital.status === "amber").length;
   const status: HealthStatus = redCount > 0 ? "red" : amberCount > 0 ? "amber" : "green";
-  const score = Math.max(18, 100 - redCount * 24 - amberCount * 9);
 
   return {
     status,
-    score,
     bmi,
     ...statusCopy[status],
     vitals: vitalsWithDetails,
+    care: buildCareGuidance(vitalsWithDetails, status),
   };
 }

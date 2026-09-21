@@ -127,13 +127,62 @@ textarea {
 }
 
 .gauge-needle {
-  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-  animation: gauge-enter 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: gauge-sweep 1.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: rotate(var(--gauge-target));
+  transform-box: view-box;
+  transform-origin: 160px 160px;
 }
 
-@keyframes gauge-enter {
+.gauge-face {
+  animation: gauge-face-enter 650ms ease-out both;
+  transform-box: view-box;
+  transform-origin: 160px 160px;
+}
+
+.gauge-result > div {
+  animation: gauge-badge-enter 420ms 1.65s ease-out both;
+}
+
+@keyframes gauge-sweep {
+  0% {
+    transform: rotate(-76deg);
+  }
+  31% {
+    transform: rotate(72deg);
+  }
+  51% {
+    transform: rotate(-67deg);
+  }
+  74% {
+    transform: rotate(calc(var(--gauge-target) + 9deg));
+  }
+  88% {
+    transform: rotate(calc(var(--gauge-target) - 4deg));
+  }
+  100% {
+    transform: rotate(var(--gauge-target));
+  }
+}
+
+@keyframes gauge-face-enter {
   from {
-    transform: rotate(-78deg);
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gauge-badge-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -243,7 +292,11 @@ textarea {
 
   .gauge-needle {
     animation: none;
-    transition: none;
+  }
+
+  .gauge-face,
+  .gauge-result > div {
+    animation: none;
   }
 
   .analyzing-halo,

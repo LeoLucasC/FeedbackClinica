@@ -5,6 +5,8 @@ import {
   Activity,
   ArrowLeft,
   ArrowRight,
+  Check,
+  Clock3,
   Gauge,
   Heart,
   Info,
@@ -12,7 +14,9 @@ import {
   RefreshCw,
   Ruler,
   ShieldCheck,
+  Stethoscope,
   Thermometer,
+  TriangleAlert,
   Weight,
   Wind,
   Zap,
@@ -27,6 +31,8 @@ import {
   evaluateVitals,
   inputLimits,
   validateVitals,
+  type CareAreaId,
+  type CareGuidance,
   type HealthResult,
   type HealthStatus,
   type VitalsInput,
@@ -46,12 +52,12 @@ const fieldConfigs: Array<{
 }> = [
   { name: "height", label: "Talla", shortLabel: "Talla", unit: "cm", placeholder: "170", step: "0.1", icon: Ruler },
   { name: "weight", label: "Peso", shortLabel: "Peso", unit: "kg", placeholder: "68", step: "0.1", icon: Weight },
-  { name: "systolic", label: "Presión sistólica", shortLabel: "Sistólica", unit: "mmHg", placeholder: "120", step: "1", icon: Gauge },
-  { name: "diastolic", label: "Presión diastólica", shortLabel: "Diastólica", unit: "mmHg", placeholder: "80", step: "1", icon: Gauge },
-  { name: "heartRate", label: "Frecuencia cardiaca", shortLabel: "F. cardiaca", unit: "lpm", placeholder: "72", step: "1", icon: Heart },
-  { name: "oxygen", label: "Saturación de oxígeno", shortLabel: "SatO₂", unit: "%", placeholder: "98", step: "0.1", icon: Activity },
-  { name: "temperature", label: "Temperatura", shortLabel: "Temperatura", unit: "°C", placeholder: "36.5", step: "0.1", icon: Thermometer },
-  { name: "respiratoryRate", label: "Frecuencia respiratoria", shortLabel: "F. respiratoria", unit: "rpm", placeholder: "16", step: "1", icon: Wind },
+  { name: "systolic", label: "Presión arterial sistólica (P.A.S.)", shortLabel: "Sistólica (P.A.S.)", unit: "mmHg", placeholder: "120", step: "1", icon: Gauge },
+  { name: "diastolic", label: "Presión arterial diastólica (P.A.D.)", shortLabel: "Diastólica (P.A.D.)", unit: "mmHg", placeholder: "80", step: "1", icon: Gauge },
+  { name: "heartRate", label: "Frecuencia cardíaca (F.C.)", shortLabel: "F. cardíaca (F.C.)", unit: "lpm", placeholder: "72", step: "1", icon: Heart },
+  { name: "oxygen", label: "Saturación de oxígeno (SatO₂)", shortLabel: "SatO₂", unit: "%", placeholder: "98", step: "0.1", icon: Activity },
+  { name: "temperature", label: "Temperatura (T°)", shortLabel: "Temperatura (T°)", unit: "°C", placeholder: "36.5", step: "0.1", icon: Thermometer },
+  { name: "respiratoryRate", label: "Frecuencia respiratoria (F.R.)", shortLabel: "F. respiratoria (F.R.)", unit: "rpm", placeholder: "16", step: "1", icon: Wind },
 ];
 
 const vitalIcons: Record<VitalResult["id"], Icon> = {
@@ -63,15 +69,22 @@ const vitalIcons: Record<VitalResult["id"], Icon> = {
   respiratoryRate: Wind,
 };
 
+const careAreaIcons: Record<CareAreaId, Icon> = {
+  generalMedicine: Stethoscope,
+  cardiology: Heart,
+  pulmonology: Wind,
+  nutrition: Weight,
+};
+
 const statusStyles: Record<HealthStatus, { label: string; text: string; badge: string; surface: string }> = {
   green: {
-    label: "Óptimo",
+    label: "Estable",
     text: "text-[#668b21]",
     badge: "border-green-200 bg-green-50 text-[#668b21]",
     surface: "border-green-100 bg-green-50/55",
   },
   amber: {
-    label: "Atención",
+    label: "Por observar",
     text: "text-[#a97800]",
     badge: "border-yellow-200 bg-yellow-50 text-[#926a00]",
     surface: "border-yellow-100 bg-yellow-50/55",
@@ -116,6 +129,85 @@ function VitalCard({ vital }: { vital: VitalResult }) {
       </p>
       <p className="mt-2 text-xs leading-5 text-slate-400">{vital.detail}</p>
     </article>
+  );
+}
+
+function CareRoute({ care }: { care: CareGuidance }) {
+  const isPriority = care.level === "priority";
+  const LeadIcon = isPriority ? TriangleAlert : Stethoscope;
+
+  return (
+    <section className="mt-6 overflow-hidden rounded-[1.75rem] border border-sky-100 bg-white shadow-[0_18px_55px_rgba(31,65,88,0.08)]">
+      <div className="border-b border-slate-100 px-5 py-5 sm:flex sm:items-center sm:justify-between sm:px-7">
+        <div>
+          <p className="font-poppins text-sm font-bold uppercase tracking-[0.12em] text-bolivar-blue">Ruta de atención sugerida</p>
+          <h2 className="mt-1 font-poppins text-2xl font-bold tracking-tight text-slate-950">¿A qué servicio acudir?</h2>
+        </div>
+        <span
+          className={`mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-bold sm:mt-0 ${
+            isPriority ? "border-red-200 bg-red-50 text-red-700" : "border-sky-100 bg-sky-50 text-bolivar-blue"
+          }`}
+        >
+          <Clock3 className="size-4" aria-hidden="true" />
+          {care.timeframe}
+        </span>
+      </div>
+
+      <div className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[0.82fr_1.18fr]">
+        <div className={`rounded-2xl border p-5 ${isPriority ? "border-red-100 bg-red-50/70" : "border-sky-100 bg-sky-50/65"}`}>
+          <span
+            className={`grid size-12 place-items-center rounded-2xl ${
+              isPriority ? "bg-red-100 text-red-700" : "bg-bolivar-blue/10 text-bolivar-blue"
+            }`}
+          >
+            <LeadIcon className="size-6" aria-hidden="true" />
+          </span>
+          <p className="mt-5 font-poppins text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Servicio inicial recomendado</p>
+          <h3 className="mt-1 font-poppins text-2xl font-bold text-slate-950">{care.service}</h3>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{care.summary}</p>
+        </div>
+
+        <div>
+          <p className="font-poppins text-sm font-bold text-slate-900">
+            {isPriority ? "Áreas relacionadas para el seguimiento" : "Área clínica relacionada"}
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {care.areas.map((area) => {
+              const Icon = careAreaIcons[area.id];
+              return (
+                <article key={area.id} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-bolivar-blue">
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3 className="font-poppins text-sm font-bold text-slate-900">{area.name}</h3>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">Por: {area.reason}</p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="mt-5">
+            <p className="font-poppins text-sm font-bold text-slate-900">Qué hacer ahora</p>
+            <ul className="mt-3 grid gap-2.5">
+              {care.actions.map((action) => (
+                <li key={action} className="flex items-start gap-2.5 text-sm leading-6 text-slate-600">
+                  <span className="mt-1 grid size-4 shrink-0 place-items-center rounded-full bg-bolivar-green/15 text-bolivar-green">
+                    <Check className="size-3" strokeWidth={3} aria-hidden="true" />
+                  </span>
+                  {action}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p className="border-t border-slate-100 bg-slate-50/70 px-5 py-3 text-xs leading-5 text-slate-500 sm:px-7">
+        Esta ruta se basa únicamente en las mediciones ingresadas. El profesional de salud confirmará el servicio adecuado según tus síntomas, antecedentes y examen clínico.
+      </p>
+    </section>
   );
 }
 
@@ -232,7 +324,7 @@ export function HealthChecker() {
           {
             name: "evaluate_preventive_health",
             title: "Evaluar signos vitales",
-            description: "Calcula el IMC y muestra el semáforo preventivo usando las ocho mediciones proporcionadas.",
+            description: "Calcula el IMC y muestra una orientación preventiva usando las ocho mediciones proporcionadas.",
             inputSchema: {
               type: "object",
               properties: Object.fromEntries(
@@ -257,7 +349,7 @@ export function HealthChecker() {
                 setAnalyzing(false);
                 setResult(nextResult);
               }, 2100);
-              return { status: nextResult.status, score: nextResult.score, bmi: nextResult.bmi };
+              return { status: nextResult.status, bmi: nextResult.bmi, recommendedService: nextResult.care.service };
             },
           },
           { signal: lifecycle.signal },
@@ -327,7 +419,7 @@ export function HealthChecker() {
           <section className="flex flex-col justify-center">
             <span className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-sky-100 bg-white px-3 py-1.5 font-poppins text-sm font-semibold text-bolivar-blue shadow-sm">
               <Activity className="size-4" aria-hidden="true" />
-              TU SEMAFORO DE CHECKEO RAPIDO EN SEGUNDOS
+              CHEQUEO PREVENTIVO EN SEGUNDOS
             </span>
             <h1 className="max-w-xl font-poppins text-4xl font-bold leading-[1.08] tracking-[-0.04em] sm:text-5xl lg:text-6xl">
               <span className="text-bolivar-blue [text-shadow:0_1px_2px_rgba(23,56,77,0.18)]">
@@ -411,7 +503,7 @@ export function HealthChecker() {
                   </p>
                 )}
                 <Button type="submit" className="mt-2 h-13 rounded-xl bg-bolivar-green text-base font-bold text-white shadow-[0_10px_24px_rgba(127,168,46,0.22)] hover:bg-[#719629] sm:col-span-2">
-                  Analizar mi salud
+                  Ver mi orientación
                   <ArrowRight className="size-5" aria-hidden="true" />
                 </Button>
               </form>
@@ -435,15 +527,15 @@ export function HealthChecker() {
             <Card className="gap-0 overflow-hidden rounded-[1.75rem] border-sky-100 bg-white py-0 shadow-[0_24px_70px_rgba(31,65,88,0.1)]">
               <CardContent className="flex h-full flex-col px-5 py-7 sm:px-8 sm:py-9">
                 <div className="flex items-center justify-between">
-                  <span className="font-poppins text-sm font-bold uppercase tracking-[0.13em] text-slate-400">Estado general</span>
+                  <span className="font-poppins text-sm font-bold uppercase tracking-[0.13em] text-slate-400">Orientación preventiva</span>
                   <ShieldCheck className="size-5 text-bolivar-blue" aria-hidden="true" />
                 </div>
-                <GaugeChart status={result.status} score={result.score} />
+                <GaugeChart status={result.status} />
                 <div className="mt-auto text-center">
                   <h1 className="font-poppins text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{result.title}</h1>
                   <p className="mx-auto mt-3 max-w-md text-base leading-7 text-slate-600">{result.message}</p>
                   <div className={`mx-auto mt-5 max-w-lg rounded-2xl border p-4 text-left text-sm leading-6 ${statusStyles[result.status].surface}`}>
-                    <span className={`font-bold ${statusStyles[result.status].text}`}>Siguiente paso: </span>
+                    <span className={`font-bold ${statusStyles[result.status].text}`}>Qué significa: </span>
                     <span className="text-slate-700">{result.recommendation}</span>
                   </div>
                 </div>
@@ -463,6 +555,8 @@ export function HealthChecker() {
               </div>
             </div>
           </div>
+
+          <CareRoute care={result.care} />
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
             <ReviewModule />
