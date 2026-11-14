@@ -9,8 +9,14 @@ const channels = JSON.parse(
 const specialties = JSON.parse(
   await readFile(new URL("./specialties.json", import.meta.url), "utf8"),
 ).specialties;
+const entryCampaigns = JSON.parse(
+  await readFile(new URL("./entry-campaigns.json", import.meta.url), "utf8"),
+).entryCampaigns;
 const channelValues = new Set(channels.map((channel) => channel.value));
 const specialtyValues = new Set(specialties.map((specialty) => specialty.value));
+const entryCampaignValues = new Set(
+  entryCampaigns.map((entryCampaign) => entryCampaign.value),
+);
 const limits = {
   name: [2, 120],
   origin: [2, 160],
@@ -42,14 +48,15 @@ app.post("/api/feedback", async (request, response) => {
 
   try {
     const { rows } = await database.query(
-      `INSERT INTO feedback (name, origin, channel, channel_other, campaign)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO feedback (name, origin, channel, channel_other, entry_campaign, campaign)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, created_at`,
       [
         parsed.name,
         parsed.origin,
         parsed.channel,
         parsed.channelOther,
+        parsed.entryCampaign,
         parsed.campaign,
       ],
     );
@@ -90,6 +97,7 @@ function parseFeedback(body) {
   const origin = clean(body.origin);
   const channel = clean(body.channel).toLowerCase();
   const channelOther = clean(body.channelOther);
+  const entryCampaign = clean(body.entryCampaign).toLowerCase();
   const campaign = clean(body.campaign).toLowerCase();
 
   if (name.length < limits.name[0] || name.length > limits.name[1]) {
@@ -111,12 +119,16 @@ function parseFeedback(body) {
   if (!specialtyValues.has(campaign)) {
     return { error: "Selecciona la campaña que te gustaría para la próxima." };
   }
+  if (!entryCampaignValues.has(entryCampaign)) {
+    return { error: "Selecciona de qué campaña estás viniendo." };
+  }
 
   return {
     name,
     origin,
     channel,
     channelOther: channel === "otro" ? channelOther : null,
+    entryCampaign,
     campaign,
   };
 }

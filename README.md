@@ -16,6 +16,7 @@ Aplicación web para Clínica Bolívar. Evalúa ocho mediciones en el navegador,
 │   ├── db.mjs                 # PostgreSQL (o PGlite en desarrollo)
 │   ├── schema.sql             # Tabla feedback
 │   ├── channels.json          # Canales disponibles (compartidos con la UI)
+│   ├── entry-campaigns.json   # Campañas por las que llega el paciente
 │   ├── specialties.json       # Especialidades para la próxima campaña
 │   └── Dockerfile             # Imagen del API
 ├── components/
@@ -78,6 +79,7 @@ Tabla `feedback`:
 | `origin`        | `text`       | Ciudad o sector de procedencia.                                |
 | `channel`       | `text`       | `facebook`, `instagram`, `tiktok`, `volante` u `otro`.          |
 | `channel_other` | `text`       | Detalle cuando `channel = 'otro'`.                             |
+| `entry_campaign`| `text`       | Campaña por la que llega: medicina general, ecografía o paquetes de laboratorio. |
 | `campaign`      | `text`       | Especialidad que le gustaría como próxima campaña.              |
 | `created_at`    | `timestamptz`| Fecha de registro.                                             |
 
@@ -90,7 +92,7 @@ Para consultar los registros en el VPS:
 
 ```bash
 docker compose exec db psql -U feedbackclinica -d feedbackclinica \
-  -c "select id, name, origin, channel, channel_other, campaign, created_at from feedback order by created_at desc;"
+  -c "select id, name, origin, channel, channel_other, entry_campaign, campaign, created_at from feedback order by created_at desc;"
 ```
 
 Respaldo rápido:

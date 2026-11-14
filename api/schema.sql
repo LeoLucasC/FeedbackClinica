@@ -4,8 +4,11 @@ CREATE TABLE IF NOT EXISTS feedback (
   origin TEXT NOT NULL,
   channel TEXT NOT NULL CHECK (channel IN ('facebook', 'instagram', 'tiktok', 'volante', 'otro')),
   channel_other TEXT,
+  entry_campaign TEXT,
   campaign TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS entry_campaign TEXT;
 
 CREATE INDEX IF NOT EXISTS feedback_created_at_idx ON feedback (created_at DESC);

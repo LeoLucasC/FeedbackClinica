@@ -1,0 +1,7 @@
+{
+  "entryCampaigns": [
+    { "value": "medicina-general", "label": "Medicina General" },
+    { "value": "ecografia", "label": "Ecografía" },
+    { "value": "paquetes-laboratorio", "label": "Paquetes de Laboratorio" }
+  ]
+}
