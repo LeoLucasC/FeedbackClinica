@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS feedback (
   origin TEXT NOT NULL,
   channel TEXT NOT NULL CHECK (channel IN ('facebook', 'instagram', 'tiktok', 'volante', 'otro')),
   channel_other TEXT,
+  campaign TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

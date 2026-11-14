@@ -1,0 +1,20 @@
+{
+  "specialties": [
+    { "value": "medicina-general", "label": "Medicina General" },
+    { "value": "cardiologia", "label": "Cardiología" },
+    { "value": "pediatria", "label": "Pediatría" },
+    { "value": "ginecologia-obstetricia", "label": "Ginecología y Obstetricia" },
+    { "value": "dermatologia", "label": "Dermatología" },
+    { "value": "nutricion", "label": "Nutrición" },
+    { "value": "odontologia", "label": "Odontología" },
+    { "value": "oftalmologia", "label": "Oftalmología" },
+    { "value": "traumatologia", "label": "Traumatología" },
+    { "value": "psicologia", "label": "Psicología" },
+    { "value": "endocrinologia", "label": "Endocrinología" },
+    { "value": "gastroenterologia", "label": "Gastroenterología" },
+    { "value": "neurologia", "label": "Neurología" },
+    { "value": "fisioterapia", "label": "Fisioterapia" },
+    { "value": "laboratorio-clinico", "label": "Laboratorio Clínico" },
+    { "value": "imagenologia", "label": "Imagenología" }
+  ]
+}

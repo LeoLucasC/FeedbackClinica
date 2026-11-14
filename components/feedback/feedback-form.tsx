@@ -11,15 +11,18 @@ import {
   MapPin,
   Megaphone,
   Send,
+  Stethoscope,
   UserRound,
 } from "lucide-react";
 
 import channelConfig from "@/api/channels.json";
+import specialtyConfig from "@/api/specialties.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 const channels = channelConfig.channels;
+const specialties = specialtyConfig.specialties;
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const inputClassName =
@@ -52,6 +55,7 @@ export function FeedbackForm() {
       channel: String(data.get("channel") ?? "").trim(),
       channelOther:
         channel === "otro" ? String(data.get("channelOther") ?? "").trim() : "",
+      campaign: String(data.get("campaign") ?? "").trim(),
     };
 
     setStatus("sending");
@@ -231,6 +235,35 @@ export function FeedbackForm() {
                         Selecciona una opción
                       </option>
                       {channels.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <label htmlFor="campaign" className="flex items-center gap-2 font-poppins text-sm font-semibold text-slate-700">
+                    <Stethoscope className="size-4 text-bolivar-blue" aria-hidden="true" />
+                    ¿Qué campaña te gustaría para la próxima?
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="campaign"
+                      name="campaign"
+                      required
+                      defaultValue=""
+                      className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 pr-10 text-base text-slate-900 outline-none transition focus-visible:border-bolivar-blue focus-visible:ring-2 focus-visible:ring-bolivar-blue/20"
+                    >
+                      <option value="" disabled>
+                        Selecciona una especialidad
+                      </option>
+                      {specialties.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>

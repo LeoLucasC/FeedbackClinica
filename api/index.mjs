@@ -6,7 +6,11 @@ import { getDatabase } from "./db.mjs";
 const channels = JSON.parse(
   await readFile(new URL("./channels.json", import.meta.url), "utf8"),
 ).channels;
+const specialties = JSON.parse(
+  await readFile(new URL("./specialties.json", import.meta.url), "utf8"),
+).specialties;
 const channelValues = new Set(channels.map((channel) => channel.value));
+const specialtyValues = new Set(specialties.map((specialty) => specialty.value));
 const limits = {
   name: [2, 120],
   origin: [2, 160],
@@ -38,10 +42,16 @@ app.post("/api/feedback", async (request, response) => {
 
   try {
     const { rows } = await database.query(
-      `INSERT INTO feedback (name, origin, channel, channel_other)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO feedback (name, origin, channel, channel_other, campaign)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, created_at`,
-      [parsed.name, parsed.origin, parsed.channel, parsed.channelOther],
+      [
+        parsed.name,
+        parsed.origin,
+        parsed.channel,
+        parsed.channelOther,
+        parsed.campaign,
+      ],
     );
     response.status(201).json({ id: rows[0].id, createdAt: rows[0].created_at });
   } catch (error) {
@@ -80,6 +90,7 @@ function parseFeedback(body) {
   const origin = clean(body.origin);
   const channel = clean(body.channel).toLowerCase();
   const channelOther = clean(body.channelOther);
+  const campaign = clean(body.campaign).toLowerCase();
 
   if (name.length < limits.name[0] || name.length > limits.name[1]) {
     return { error: "Escribe tu nombre (entre 2 y 120 caracteres)." };
@@ -97,12 +108,16 @@ function parseFeedback(body) {
   ) {
     return { error: "Especifica cómo te enteraste de la clínica." };
   }
+  if (!specialtyValues.has(campaign)) {
+    return { error: "Selecciona la campaña que te gustaría para la próxima." };
+  }
 
   return {
     name,
     origin,
     channel,
     channelOther: channel === "otro" ? channelOther : null,
+    campaign,
   };
 }
 
