@@ -1,0 +1,9 @@
+{
+  "channels": [
+    { "value": "facebook", "label": "Facebook" },
+    { "value": "instagram", "label": "Instagram" },
+    { "value": "tiktok", "label": "TikTok" },
+    { "value": "volante", "label": "Volante" },
+    { "value": "otro", "label": "Otro" }
+  ]
+}

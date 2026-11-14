@@ -1,4 +1,30 @@
 services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-feedbackclinica}
+      POSTGRES_USER: ${POSTGRES_USER:-feedbackclinica}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-feedbackclinica}
+    volumes:
+      - feedback_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-feedbackclinica} -d ${POSTGRES_DB:-feedbackclinica}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: ./api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-feedbackclinica}:${POSTGRES_PASSWORD:-feedbackclinica}@db:5432/${POSTGRES_DB:-feedbackclinica}
+      PORT: 3001
+    depends_on:
+      db:
+        condition: service_healthy
+
   web:
     build:
       context: .
@@ -7,4 +33,9 @@ services:
     image: clinica-bolivar/semaforo-salud:latest
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${WEB_PORT:-8095}:80"
+    depends_on:
+      - api
+
+volumes:
+  feedback_pgdata:

@@ -11,6 +11,7 @@ import {
   Heart,
   Info,
   Lock,
+  MessageSquareText,
   RefreshCw,
   Ruler,
   ShieldCheck,
@@ -405,10 +406,20 @@ export function HealthChecker() {
               height={62}
             />
           </a>
-          <span className="hidden items-center gap-2 text-sm font-medium text-slate-500 sm:flex">
-            <ShieldCheck className="size-4 text-bolivar-green" aria-hidden="true" />
-            Tus datos no salen de este dispositivo
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="hidden items-center gap-2 text-sm font-medium text-slate-500 sm:flex">
+              <ShieldCheck className="size-4 text-bolivar-green" aria-hidden="true" />
+              Tus mediciones no salen de este dispositivo
+            </span>
+            <a
+              href="feedback"
+              aria-label="Déjanos tus datos"
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-sky-100 bg-white px-3 font-poppins text-sm font-semibold text-bolivar-blue shadow-sm transition hover:border-bolivar-blue/40 hover:text-[#4c7fa8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolivar-blue"
+            >
+              <MessageSquareText className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Déjanos tus datos</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -564,7 +575,7 @@ export function HealthChecker() {
               <div>
                 <p className="font-poppins text-sm font-bold uppercase tracking-[0.12em] text-sky-200">Tu bienestar continúa</p>
                 <h2 className="mt-2 font-poppins text-2xl font-bold tracking-tight">Vuelve a medir cuando lo necesites.</h2>
-                <p className="mt-3 text-sm leading-6 text-sky-50/75">Puedes repetir el chequeo con nuevas mediciones. No almacenamos el resultado ni tus datos.</p>
+                <p className="mt-3 text-sm leading-6 text-sky-50/75">Puedes repetir el chequeo con nuevas mediciones. No almacenamos el resultado ni tus mediciones.</p>
               </div>
               <Button type="button" onClick={resetCheck} className="mt-6 h-11 w-full rounded-xl bg-white font-bold text-[#17384D] hover:bg-sky-50 sm:w-auto">
                 <RefreshCw className="size-4" aria-hidden="true" />
